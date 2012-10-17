@@ -104,11 +104,18 @@ package ru.waterTeam.waterBoy.player {
 			adjustYPosition();
 			
 			checkCollisionMenacingTile();
+			checkCollisionFinish();
 		}
 		
 		private function checkCollisionMenacingTile() : void {
 			if (collide(ConstantsCollision.MENACING, x, y)) {
 				(this.world as WaterWorld).resetPlayer();
+			}
+		}
+		
+		private function checkCollisionFinish() : void {
+			if(collide(ConstantsCollision.FINISH, x, y)) {
+				(this.world as WaterWorld).finishLevel();
 			}
 		}
 		

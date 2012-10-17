@@ -49,10 +49,6 @@ package ru.waterTeam.waterBoy {
 			
 			world = new WaterWorld(Levels.LEVEL);
 			FP.world = this.world;
-			
-			//world = ConstructorWorld.creatWorld(Levels.LEVEL);
-			//FP.world = this.world;
-			//world.resetPlayer();
 		}
 	}
 	
