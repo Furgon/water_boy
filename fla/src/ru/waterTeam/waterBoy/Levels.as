@@ -8,6 +8,8 @@ package ru.waterTeam.waterBoy {
 		public static const SIZE_TILE		: int = 32;
 		
 		[Embed(source = '../../../../assets/background.png')] public static const BACKGROUND : Class;
+		[Embed(source = '../../../../assets/PlantTile.png')] public static const PLANT_TILE : Class;
+		[Embed(source = '../../../../assets/ground.png')] public static const GROUND : Class;
 		[Embed(source = '../../../../assets/finish.png')] public static const FINISH : Class;
 		[Embed(source = '../../../../assets/menacingTile.png')] public static const MENACING : Class;
 		
