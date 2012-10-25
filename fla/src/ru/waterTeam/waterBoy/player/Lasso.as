@@ -1,4 +1,6 @@
 package ru.waterTeam.waterBoy.player {
+	import flash.events.*;
+	
 	import net.flashpunk.Entity;
 	import net.flashpunk.graphics.Image;
 	import net.flashpunk.FP;
@@ -9,18 +11,36 @@ package ru.waterTeam.waterBoy.player {
 	 */
 	public class Lasso extends Entity {
 		
+		private static var disp		: EventDispatcher;
+		
 		private const WIDTH			: int = 8;
 		private const HEIGHT		: int = 8;
 		private const X_SPEED		: int = 10;
 		private const Y_SPEED		: int = 5;
 		[Embed(source = '../../../../../assets/lasso.png')] private const LASSO:Class;
 		
-		private var xSpeed			: int;
-		private var ySpeed			: int = -Y_SPEED;
+		private var xSpeed				: int;
+		private var ySpeed				: int = -Y_SPEED;
 		
-		private var rightDirectionView : Boolean;
+		private var rightDirectionView	: Boolean;
+		private var collisionGround		: Boolean = false;
 		
-		private var map				: Entity;
+		private var map					: Entity;
+		
+		public function addEventListener(...p_args:Array):void {
+			if (disp == null) { disp = new EventDispatcher(); }
+			disp.addEventListener.apply(null, p_args);
+		}
+		
+		public function removeEventListener(...p_args:Array):void {
+			if (disp == null) { return; }
+			disp.removeEventListener.apply(null, p_args);
+		}
+		
+		public function dispatchEvent(...p_args:Array):void {
+			if (disp == null) { return; }
+			disp.dispatchEvent.apply(null, p_args);
+		}
 		
 		public function Lasso(map : Entity, rightDirectionView : Boolean) {
 			graphic = new Image(LASSO);
@@ -31,30 +51,39 @@ package ru.waterTeam.waterBoy.player {
 		}
 		
 		public override function update():void {
-			if (rightDirectionView) xSpeed = X_SPEED; else xSpeed = -X_SPEED;
-			ySpeed = -Y_SPEED;
+			if (!collisionGround) {
+				if (rightDirectionView) xSpeed = X_SPEED; else xSpeed = -X_SPEED;
+				ySpeed = -Y_SPEED;
+				
+				adjustPosition(); //функции проверяющие столкновения по осям x и y
+			} else {
+				
+			}
 			
-			adjustXPosition(); //функции проверяющие столкновения по осям x и y
-			adjustYPosition();
 		}
 		
-		private function adjustXPosition():void {
+		private function adjustPosition():void {
+			//проверка по оси x
 			for (var i:int = 0; i < Math.abs(xSpeed); i++){ //перебираем все значение от 0 до текущей скорости по оси x
 				if(!collideWith(map, x + FP.sign(xSpeed), y)) {
 					x += FP.sign(xSpeed); //и -1 если отрицательное) игрок не сталкивается с стеной, то перемещаем игрока в этом направлении на 1 px
 				} else { //иначе
-					xSpeed = 0; //не перемещаем
+					//xSpeed = 0; //не перемещаем
+					collisionGround = true;
+					dispatchEvent(new PlayerEvents(PlayerEvents.LASSO_COLLISION));
+					return;
 					break;
 				}
 			}
-		}
- 
-		private function adjustYPosition():void {
+			//проверка по оси y
 			for (var i:int = 0; i < Math.abs(ySpeed); i++){ //здесь все аналогично
 				if (!collideWith(map, x, y + FP.sign(ySpeed))){
 					y += FP.sign(ySpeed);
 				} else {
-					ySpeed = 0;
+					//ySpeed = 0;
+					collisionGround = true;
+					dispatchEvent(new PlayerEvents(PlayerEvents.LASSO_COLLISION));
+					return;
 					break;
 				}
 			}

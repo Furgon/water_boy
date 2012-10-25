@@ -1,5 +1,7 @@
 package ru.waterTeam.waterBoy.player {
 	import flash.display.MovieClip;
+	import flash.events.*;
+	
 	import net.flashpunk.Entity;
 	import net.flashpunk.graphics.Image;
 	import net.flashpunk.utils.Input;
@@ -15,6 +17,7 @@ package ru.waterTeam.waterBoy.player {
 	 */
 	public class Player extends Entity {
 		
+		private static var disp					: EventDispatcher;
 		private static var _startPositionX		: int = 0;
 		private static var _startPositionY		: int = 0;
 		
@@ -36,8 +39,24 @@ package ru.waterTeam.waterBoy.player {
 		
 		private var lasso				: Lasso;
 		private var rightDirectionView	: Boolean = true;
+		private var _update				: Function = standartUpdate;
 		
 		[Embed(source = '../../../../../assets/player.png')] private const PLAYER:Class;
+		
+		public function addEventListener(...p_args:Array):void {
+			if (disp == null) { disp = new EventDispatcher(); }
+			disp.addEventListener.apply(null, p_args);
+		}
+		
+		public function removeEventListener(...p_args:Array):void {
+			if (disp == null) { return; }
+			disp.removeEventListener.apply(null, p_args);
+		}
+		
+		public function dispatchEvent(...p_args:Array):void {
+			if (disp == null) { return; }
+			disp.dispatchEvent.apply(null, p_args);
+		}
 		
 		public static function set startPositionX(value : int) : void {
 			_startPositionX = value;
@@ -57,7 +76,16 @@ package ru.waterTeam.waterBoy.player {
 			this.map = map;
 		}
 		
-		public override function update():void {
+		public override function update() : void {
+			_update();
+		}
+		
+		private function updateCollision() : void {
+			standartUpdate();
+			trace("обработка коллизии");
+		}
+		
+		private function standartUpdate() : void {
 			var pressed:Boolean = false;
 			if (Input.check(Key.LEFT)){
 				xSpeed -= POWER;
@@ -71,12 +99,15 @@ package ru.waterTeam.waterBoy.player {
 			}
 			
 			if (Input.pressed(Key.CONTROL)) {
-				if(lasso) {
+				if (lasso) {
+					lasso.removeEventListener(PlayerEvents.LASSO_COLLISION, lassoCollisionHandler);
 					FP.world.remove(lasso);
+					_update = standartUpdate;
 				}			
 				lasso = new Lasso(map, rightDirectionView);
 				lasso.x = x;
 				lasso.y = y;
+				lasso.addEventListener(PlayerEvents.LASSO_COLLISION, lassoCollisionHandler);
 				FP.world.add(lasso);
 			}
 			
@@ -121,6 +152,10 @@ package ru.waterTeam.waterBoy.player {
 			
 			checkCollisionMenacingTile();
 			checkCollisionFinish();
+		}
+		
+		private function lassoCollisionHandler(e : PlayerEvents) : void {
+			_update = updateCollision;
 		}
 		
 		private function checkCollisionMenacingTile() : void {
