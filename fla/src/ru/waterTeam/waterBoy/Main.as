@@ -1,4 +1,5 @@
 package ru.waterTeam.waterBoy {
+	import flash.display.MovieClip;
 	import flash.display.Sprite;
 	import flash.events.Event;
 	
@@ -44,7 +45,8 @@ package ru.waterTeam.waterBoy {
 		public function Main():void {
 			super(800, 640, 60, false); //конструктор
 			
-			FP.screen.color = 0xff0000; //цвет фона
+			FP.stage = stage;
+			FP.screen.color = 0x330000; //цвет фона
 			FP.console.enable();
 			
 			world = new WaterWorld(Levels.LEVEL);

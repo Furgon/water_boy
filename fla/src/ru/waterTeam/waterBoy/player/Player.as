@@ -1,4 +1,5 @@
 package ru.waterTeam.waterBoy.player {
+	import flash.display.MovieClip;
 	import net.flashpunk.Entity;
 	import net.flashpunk.graphics.Image;
 	import net.flashpunk.utils.Input;
@@ -17,21 +18,24 @@ package ru.waterTeam.waterBoy.player {
 		private static var _startPositionX		: int = 0;
 		private static var _startPositionY		: int = 0;
 		
-		private const WIDTH			: int = 16;
-		private const HEIGHT		: int = 16;
+		private const WIDTH				: int = 16;
+		private const HEIGHT			: int = 16;
 		
-		private const POWER			: Number = 0.3;
-		private const JUMP_POWER	: Number = 8;
-		private const GRAVITY		: Number = 0.2;
-		private const H_FRICTION	: Number = 0.95;
-		private const V_FRICTION	: Number = 0.99;
+		private const POWER				: Number = 0.3;
+		private const JUMP_POWER		: Number = 8;
+		private const GRAVITY			: Number = 0.2;
+		private const H_FRICTION		: Number = 0.95;
+		private const V_FRICTION		: Number = 0.99;
 		
-		private var readyJump		: Boolean = true;
+		private var readyJump			: Boolean = true;
 		
-		private var xSpeed			: Number = 0;
-		private var ySpeed			: Number = 0;
+		private var xSpeed				: Number = 0;
+		private var ySpeed				: Number = 0;
 		
-		private var map				: Entity;
+		private var map					: Entity;
+		
+		private var lasso				: Lasso;
+		private var rightDirectionView	: Boolean = true;
 		
 		[Embed(source = '../../../../../assets/player.png')] private const PLAYER:Class;
 		
@@ -58,10 +62,22 @@ package ru.waterTeam.waterBoy.player {
 			if (Input.check(Key.LEFT)){
 				xSpeed -= POWER;
 				pressed = true;
+				rightDirectionView = false;
 			}
 			if (Input.check(Key.RIGHT)){
 				xSpeed += POWER;
 				pressed = true;
+				rightDirectionView = true;
+			}
+			
+			if (Input.pressed(Key.CONTROL)) {
+				if(lasso) {
+					FP.world.remove(lasso);
+				}			
+				lasso = new Lasso(map, rightDirectionView);
+				lasso.x = x;
+				lasso.y = y;
+				FP.world.add(lasso);
 			}
 			
 			//if (collide(ConstantsCollision.GROUND, x, y + 1)){

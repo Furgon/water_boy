@@ -14,12 +14,15 @@
     </define>
     <define append="true">
       <name>CONFIG::timeStamp</name>
-      <value>'24.10.2012'</value>
+      <value>'26.10.2012'</value>
     </define>
     <source-path append="true">
       <path-element>D:\Project\water_boy\fla\src</path-element>
       <path-element>C:\Program Files (x86)\FlashDevelop\Library\AS3\classes</path-element>
     </source-path>
+    <library-path append="true">
+      <path-element>D:\Project\water_boy\fla\lib\skin.swc</path-element>
+    </library-path>
   </compiler>
   <file-specs>
     <path-element>D:\Project\water_boy\fla\src\ru\waterTeam\waterBoy\Main.as</path-element>
