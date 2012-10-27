@@ -76,7 +76,7 @@ package ru.waterTeam.waterBoy.player {
 				}
 			}
 			//проверка по оси y
-			for (var i:int = 0; i < Math.abs(ySpeed); i++){ //здесь все аналогично
+			for (var j:int = 0; j < Math.abs(ySpeed); j++){ //здесь все аналогично
 				if (!collideWith(map, x, y + FP.sign(ySpeed))){
 					y += FP.sign(ySpeed);
 				} else {
