@@ -21,25 +21,25 @@ package ru.waterTeam.waterBoy.player {
 		private static var _startPositionX		: int = 0;
 		private static var _startPositionY		: int = 0;
 		
-		private const WIDTH				: int = 16;
-		private const HEIGHT			: int = 16;
+		private const WIDTH						: int = 16;
+		private const HEIGHT					: int = 16;
 		
-		private const POWER				: Number = 0.3;
-		private const JUMP_POWER		: Number = 8;
-		private const GRAVITY			: Number = 0.2;
-		private const H_FRICTION		: Number = 0.95;
-		private const V_FRICTION		: Number = 0.99;
+		private const POWER						: Number = 0.3;
+		private const JUMP_POWER				: Number = 8;
+		private const GRAVITY					: Number = 0.2;
+		private const H_FRICTION				: Number = 0.95;
+		private const V_FRICTION				: Number = 0.99;
 		
-		private var readyJump			: Boolean = true;
+		private var readyJump					: Boolean = true;
 		
-		private var xSpeed				: Number = 0;
-		private var ySpeed				: Number = 0;
+		private var xSpeed						: Number = 0;
+		private var ySpeed						: Number = 0;
 		
-		private var map					: Entity;
+		private var map							: Entity;
 		
-		private var lasso				: Lasso;
-		private var rightDirectionView	: Boolean = true;
-		private var _update				: Function = standartUpdate;
+		private var lasso						: Lasso;
+		private var rightDirectionView			: Boolean = true;
+		private var _update						: Function = defaultUpdate;
 		
 		[Embed(source = '../../../../../assets/player.png')] private const PLAYER:Class;
 		
@@ -81,11 +81,28 @@ package ru.waterTeam.waterBoy.player {
 		}
 		
 		private function updateCollision() : void {
-			standartUpdate();
-			trace("обработка коллизии");
+			var deltaX : Number = lasso.x - x;
+			var deltaY : Number = lasso.y - y;
+			var length : Number = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
+			deltaX = deltaX / length;
+			deltaY = deltaY / length;
+			xSpeed += deltaX * lasso.POWER;
+			ySpeed += deltaY * lasso.POWER;
+			
+			defaultUpdate();
 		}
 		
-		private function standartUpdate() : void {
+		private function testDistanceLasso() : void {
+			if (lasso && (x - lasso.x) * (x - lasso.x) + (y - lasso.y) * (y - lasso.y) > lasso.SQUARE_MAX_DISTANCE) {
+				lasso.removeEventListener(PlayerEvents.LASSO_COLLISION, lassoCollisionHandler);
+				FP.world.remove(lasso);
+				_update = defaultUpdate;
+				lasso = null;
+			}
+		}
+		
+		private function defaultUpdate() : void {
+			trace("xSpeed", xSpeed, "ySpeed", ySpeed);
 			var pressed:Boolean = false;
 			if (Input.check(Key.LEFT)){
 				xSpeed -= POWER;
@@ -102,7 +119,7 @@ package ru.waterTeam.waterBoy.player {
 				if (lasso) {
 					lasso.removeEventListener(PlayerEvents.LASSO_COLLISION, lassoCollisionHandler);
 					FP.world.remove(lasso);
-					_update = standartUpdate;
+					_update = defaultUpdate;
 				}			
 				lasso = new Lasso(map, rightDirectionView);
 				lasso.x = x;
@@ -150,12 +167,23 @@ package ru.waterTeam.waterBoy.player {
 			adjustXPosition(); //функции проверяющие столкновения по осям x и y
 			adjustYPosition();
 			
+			//testDistanceLasso();
+			checkCollisionLasso();
 			checkCollisionMenacingTile();
 			checkCollisionFinish();
 		}
 		
 		private function lassoCollisionHandler(e : PlayerEvents) : void {
 			_update = updateCollision;
+		}
+		
+		private function checkCollisionLasso() : void {
+			if (collide(Lasso.TYPE_COLLISION, x, y)) {
+				lasso.removeEventListener(PlayerEvents.LASSO_COLLISION, lassoCollisionHandler);
+				FP.world.remove(lasso);
+				_update = defaultUpdate;
+				lasso = null;
+			}
 		}
 		
 		private function checkCollisionMenacingTile() : void {

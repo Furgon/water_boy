@@ -11,12 +11,17 @@ package ru.waterTeam.waterBoy.player {
 	 */
 	public class Lasso extends Entity {
 		
-		private static var disp		: EventDispatcher;
+		private static var disp					: EventDispatcher;
+		public static const TYPE_COLLISION		: String = "lasso";
 		
-		private const WIDTH			: int = 8;
-		private const HEIGHT		: int = 8;
-		private const X_SPEED		: int = 10;
-		private const Y_SPEED		: int = 5;
+		public const MAX_DISTANCE				: Number = 150;
+		public const SQUARE_MAX_DISTANCE		: Number = MAX_DISTANCE * MAX_DISTANCE;
+		public const POWER						: int = 2;
+		
+		private const WIDTH						: int = 8;
+		private const HEIGHT					: int = 8;
+		private const X_SPEED					: int = 10;
+		private const Y_SPEED					: int = 5;
 		[Embed(source = '../../../../../assets/lasso.png')] private const LASSO:Class;
 		
 		private var xSpeed				: int;
@@ -45,6 +50,7 @@ package ru.waterTeam.waterBoy.player {
 		public function Lasso(map : Entity, rightDirectionView : Boolean) {
 			graphic = new Image(LASSO);
 			setHitbox(WIDTH, HEIGHT);
+			type = TYPE_COLLISION;
 			
 			this.map = map;
 			this.rightDirectionView = rightDirectionView;
@@ -56,10 +62,7 @@ package ru.waterTeam.waterBoy.player {
 				ySpeed = -Y_SPEED;
 				
 				adjustPosition(); //функции проверяющие столкновения по осям x и y
-			} else {
-				
 			}
-			
 		}
 		
 		private function adjustPosition():void {
