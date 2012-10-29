@@ -6,7 +6,7 @@ package ru.waterTeam.waterBoy.player {
 	 * @author 
 	 */
 	public class PlayerEvents extends Event {
-		public static const LASSO_COLLISION			: String = "lassoCollision";
+		public static const ACTIVATION_TELEPORT		: String = "activationTeleport";
 		
 		public function PlayerEvents(type:String, bubbles:Boolean = false, cancelable:Boolean = false) {
 			super(type, bubbles, cancelable);

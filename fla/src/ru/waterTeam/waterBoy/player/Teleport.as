@@ -9,23 +9,27 @@ package ru.waterTeam.waterBoy.player {
 	 * ...
 	 * @author 
 	 */
-	public class Lasso extends Entity {
+	public class Teleport extends Entity {
 		
 		private static var disp		: EventDispatcher;
 		
 		private const WIDTH			: int = 8;
 		private const HEIGHT		: int = 8;
-		private const X_SPEED		: int = 10;
-		private const Y_SPEED		: int = 5;
-		[Embed(source = '../../../../../assets/lasso.png')] private const LASSO:Class;
+		private const GRAVITY		: Number = 0.2;
+		private const H_FRICTION	: Number = 0.99;
+		private const V_FRICTION	: Number = 0.99;
+		private const X_POWER		: int = 10;
+		private const Y_POWER		: int = -4;
+		[Embed(source = '../../../../../assets/teleport.png')] private const TELEPORT:Class;
 		
-		private var xSpeed				: int;
-		private var ySpeed				: int = -Y_SPEED;
+		private var xSpeed				: Number;
+		private var ySpeed				: Number;
 		
 		private var rightDirectionView	: Boolean;
-		private var collisionGround		: Boolean = false;
 		
 		private var map					: Entity;
+		
+		private var _update				: Function = defaultUpdate;
 		
 		public function addEventListener(...p_args:Array):void {
 			if (disp == null) { disp = new EventDispatcher(); }
@@ -42,24 +46,33 @@ package ru.waterTeam.waterBoy.player {
 			disp.dispatchEvent.apply(null, p_args);
 		}
 		
-		public function Lasso(map : Entity, rightDirectionView : Boolean) {
-			graphic = new Image(LASSO);
-			setHitbox(WIDTH, HEIGHT);
-			
+		public function Teleport(map : Entity, rightDirectionView : Boolean) {
+			setHitbox(WIDTH, HEIGHT, WIDTH/2, HEIGHT/2);
+			centerOrigin();
+			graphic = new Image(TELEPORT);
+			graphic.x -= WIDTH / 2;
+			graphic.y -= HEIGHT / 2;
 			this.map = map;
 			this.rightDirectionView = rightDirectionView;
+			
+			if (rightDirectionView) xSpeed = X_POWER; else xSpeed = -X_POWER;;
+			ySpeed = Y_POWER;
 		}
 		
-		public override function update():void {
-			if (!collisionGround) {
-				if (rightDirectionView) xSpeed = X_SPEED; else xSpeed = -X_SPEED;
-				ySpeed = -Y_SPEED;
-				
-				adjustPosition(); //функции проверяющие столкновения по осям x и y
-			} else {
-				
-			}
+		public override function update() : void {
+			_update();
+		}
+		
+		private function defaultUpdate():void {
+			xSpeed *= H_FRICTION;
+			ySpeed *= V_FRICTION;
 			
+			ySpeed += GRAVITY;
+			
+			adjustPosition(); //функции проверяющие столкновения по осям x и y
+		}
+		
+		private function emptyUpdate() : void {
 		}
 		
 		private function adjustPosition():void {
@@ -68,21 +81,23 @@ package ru.waterTeam.waterBoy.player {
 				if(!collideWith(map, x + FP.sign(xSpeed), y)) {
 					x += FP.sign(xSpeed); //и -1 если отрицательное) игрок не сталкивается с стеной, то перемещаем игрока в этом направлении на 1 px
 				} else { //иначе
-					//xSpeed = 0; //не перемещаем
-					collisionGround = true;
-					dispatchEvent(new PlayerEvents(PlayerEvents.LASSO_COLLISION));
+				//	xSpeed = 0;
+				//	ySpeed = 0;
+					_update = emptyUpdate;
+					dispatchEvent(new PlayerEvents(PlayerEvents.ACTIVATION_TELEPORT));
 					return;
 					break;
 				}
 			}
 			//проверка по оси y
-			for (var i:int = 0; i < Math.abs(ySpeed); i++){ //здесь все аналогично
+			for (var j:int = 0; j < Math.abs(ySpeed); j++){ //здесь все аналогично
 				if (!collideWith(map, x, y + FP.sign(ySpeed))){
 					y += FP.sign(ySpeed);
 				} else {
-					//ySpeed = 0;
-					collisionGround = true;
-					dispatchEvent(new PlayerEvents(PlayerEvents.LASSO_COLLISION));
+				//	xSpeed = 0;
+				//	ySpeed = 0;
+					_update = emptyUpdate;
+					dispatchEvent(new PlayerEvents(PlayerEvents.ACTIVATION_TELEPORT));
 					return;
 					break;
 				}

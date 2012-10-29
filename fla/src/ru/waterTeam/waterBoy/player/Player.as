@@ -37,7 +37,7 @@ package ru.waterTeam.waterBoy.player {
 		
 		private var map					: Entity;
 		
-		private var lasso				: Lasso;
+		private var teleport			: Teleport;
 		private var rightDirectionView	: Boolean = true;
 		private var _update				: Function = standartUpdate;
 		
@@ -67,12 +67,13 @@ package ru.waterTeam.waterBoy.player {
 		}
 		
 		public function Player(map : Entity) : void {
+			setHitbox(WIDTH, HEIGHT, WIDTH/2, HEIGHT/2);
+			centerOrigin();
 			graphic = new Image(PLAYER);
-			setHitbox(WIDTH, HEIGHT);
-			
+			graphic.x -= WIDTH / 2;
+			graphic.y -= HEIGHT / 2;
 			x = _startPositionX;
 			y = _startPositionY;
-			
 			this.map = map;
 		}
 		
@@ -80,9 +81,50 @@ package ru.waterTeam.waterBoy.player {
 			_update();
 		}
 		
+		private function SearchNewX() : void {
+			for (var deltaX : int = teleport.width / 2; deltaX < width / 2; deltaX++) {		//тайл земли справа
+				if (teleport.collideWith(map, teleport.x + deltaX, teleport.y)) {
+					x = teleport.x - (width / 2 - deltaX) - 1;
+					return;
+				}
+			}
+
+			for (deltaX = teleport.width / 2; deltaX < width / 2; deltaX++) {		//тайл земли слева
+				if (teleport.collideWith(map, teleport.x - deltaX, teleport.y)) {
+					x = teleport.x + (width / 2 - deltaX) + 1;
+					return;
+				}
+			}
+			x = teleport.x
+		}
+		
+		private function SearchNewY() : void {
+			for (var deltaY : int = teleport.height / 2; deltaY < height / 2; deltaY++) {		//тайл земли снизу
+				if (teleport.collideWith(map, teleport.x, teleport.y + deltaY)) {
+					y = teleport.y - (height/2 - deltaY);
+					return;
+				}
+			}
+			
+			for (deltaY = teleport.height / 2; deltaY < height / 2; deltaY++) {		//тайл земли сверху
+				if (teleport.collideWith(map, teleport.x, teleport.y - deltaY)) {
+					y = teleport.y + (height/2 - deltaY);
+					return;
+				}
+			}
+			y = teleport.y;
+		}
+		
 		private function updateCollision() : void {
 			standartUpdate();
-			trace("обработка коллизии");
+			
+			SearchNewX();
+			SearchNewY();
+			
+			teleport.removeEventListener(PlayerEvents.ACTIVATION_TELEPORT, teleportCollisionHandler);
+			FP.world.remove(teleport);
+			teleport = null;
+			_update = standartUpdate;
 		}
 		
 		private function standartUpdate() : void {
@@ -99,16 +141,16 @@ package ru.waterTeam.waterBoy.player {
 			}
 			
 			if (Input.pressed(Key.CONTROL)) {
-				if (lasso) {
-					lasso.removeEventListener(PlayerEvents.LASSO_COLLISION, lassoCollisionHandler);
-					FP.world.remove(lasso);
+				if (teleport) {
+					teleport.removeEventListener(PlayerEvents.ACTIVATION_TELEPORT, teleportCollisionHandler);
+					FP.world.remove(teleport);
 					_update = standartUpdate;
 				}			
-				lasso = new Lasso(map, rightDirectionView);
-				lasso.x = x;
-				lasso.y = y;
-				lasso.addEventListener(PlayerEvents.LASSO_COLLISION, lassoCollisionHandler);
-				FP.world.add(lasso);
+				teleport = new Teleport(map, rightDirectionView);
+				teleport.x = x;
+				teleport.y = y;
+				teleport.addEventListener(PlayerEvents.ACTIVATION_TELEPORT, teleportCollisionHandler);
+				FP.world.add(teleport);
 			}
 			
 			//if (collide(ConstantsCollision.GROUND, x, y + 1)){
@@ -154,7 +196,7 @@ package ru.waterTeam.waterBoy.player {
 			checkCollisionFinish();
 		}
 		
-		private function lassoCollisionHandler(e : PlayerEvents) : void {
+		private function teleportCollisionHandler(e : PlayerEvents) : void {
 			_update = updateCollision;
 		}
 		
