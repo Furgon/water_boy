@@ -39,7 +39,7 @@ package ru.waterTeam.waterBoy.player {
 		
 		private var teleport			: Teleport;
 		private var rightDirectionView	: Boolean = true;
-		private var _update				: Function = standartUpdate;
+		private var _update				: Function = defaultUpdate;
 		
 		[Embed(source = '../../../../../assets/player.png')] private const PLAYER:Class;
 		
@@ -84,14 +84,14 @@ package ru.waterTeam.waterBoy.player {
 		private function SearchNewX() : void {
 			for (var deltaX : int = teleport.width / 2; deltaX < width / 2; deltaX++) {		//тайл земли справа
 				if (teleport.collideWith(map, teleport.x + deltaX, teleport.y)) {
-					x = teleport.x - (width / 2 - deltaX) - 1;
+					x = teleport.x - (width / 2 - deltaX);
 					return;
 				}
 			}
 
 			for (deltaX = teleport.width / 2; deltaX < width / 2; deltaX++) {		//тайл земли слева
 				if (teleport.collideWith(map, teleport.x - deltaX, teleport.y)) {
-					x = teleport.x + (width / 2 - deltaX) + 1;
+					x = teleport.x + (width / 2 - deltaX);
 					return;
 				}
 			}
@@ -116,18 +116,20 @@ package ru.waterTeam.waterBoy.player {
 		}
 		
 		private function updateCollision() : void {
-			standartUpdate();
+			defaultUpdate();
 			
 			SearchNewX();
 			SearchNewY();
+			xSpeed = 0;
+			ySpeed = 0;
 			
 			teleport.removeEventListener(PlayerEvents.ACTIVATION_TELEPORT, teleportCollisionHandler);
 			FP.world.remove(teleport);
 			teleport = null;
-			_update = standartUpdate;
+			_update = defaultUpdate;
 		}
 		
-		private function standartUpdate() : void {
+		private function defaultUpdate() : void {
 			var pressed:Boolean = false;
 			if (Input.check(Key.LEFT)){
 				xSpeed -= POWER;
@@ -144,7 +146,7 @@ package ru.waterTeam.waterBoy.player {
 				if (teleport) {
 					teleport.removeEventListener(PlayerEvents.ACTIVATION_TELEPORT, teleportCollisionHandler);
 					FP.world.remove(teleport);
-					_update = standartUpdate;
+					_update = defaultUpdate;
 				}			
 				teleport = new Teleport(map, rightDirectionView);
 				teleport.x = x;
