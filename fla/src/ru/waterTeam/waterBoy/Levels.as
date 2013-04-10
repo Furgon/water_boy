@@ -13,6 +13,6 @@ package ru.waterTeam.waterBoy {
 		[Embed(source = '../../../../assets/finish.png')] public static const FINISH : Class;
 		[Embed(source = '../../../../assets/menacingTile.png')] public static const MENACING : Class;
 		
-		[Embed(source = '../../../../levels/firstLevel.oel', mimeType = 'application/octet-stream')] public static const LEVEL : Class;
+		[Embed(source = '../../../../levels/5Level.oel', mimeType = 'application/octet-stream')] public static const LEVEL : Class;
 	}	
 }

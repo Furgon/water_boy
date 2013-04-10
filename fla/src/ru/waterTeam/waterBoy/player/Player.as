@@ -40,6 +40,9 @@ package ru.waterTeam.waterBoy.player {
 		private var teleport			: Teleport;
 		private var rightDirectionView	: Boolean = true;
 		private var _update				: Function = defaultUpdate;
+
+		//Alexe added this TEMPORARY! Igor should rewrite this.
+		private var isXWall, isYWall	: Boolean = false;
 		
 		[Embed(source = '../../../../../assets/player.png')] private const PLAYER:Class;
 		
@@ -132,12 +135,12 @@ package ru.waterTeam.waterBoy.player {
 		private function defaultUpdate() : void {
 			var pressed:Boolean = false;
 			if (Input.check(Key.LEFT)){
-				xSpeed -= POWER;
+				xSpeed -= POWER;			
 				pressed = true;
 				rightDirectionView = false;
 			}
 			if (Input.check(Key.RIGHT)){
-				xSpeed += POWER;
+				xSpeed += POWER;			
 				pressed = true;
 				rightDirectionView = true;
 			}
@@ -217,6 +220,7 @@ package ru.waterTeam.waterBoy.player {
 		private function adjustXPosition():void {
 			for (var i:int = 0; i < Math.abs(xSpeed); i++){ //перебираем все значение от 0 до текущей скорости по оси x
 				//if (!collide(ConstantsCollision.GROUND, x + FP.sign(xSpeed), y)){ //Если перемещяя игрока на 1 пиксель (FP.sign возвращает 1 если число положительное,)
+					// Alexey added isWall flag, TEMP! Igor should rewrite this
 				if(!collideWith(map, x + FP.sign(xSpeed), y)) {
 					x += FP.sign(xSpeed); //и -1 если отрицательное) игрок не сталкивается с стеной, то перемещаем игрока в этом направлении на 1 px
 				} else { //иначе
